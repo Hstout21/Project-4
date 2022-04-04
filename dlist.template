@@ -1,0 +1,183 @@
+/*************************************************************************
+      Hunter Stout    -   4/3/2022
+      dlist.template  -   Linked list template file.
+*************************************************************************/
+
+//####################################### B I G 3   H E L P E R S #######################################
+template<class T>
+void dlist<T>::erase() { //Deconstructor
+    node<T>* rmptr;
+    while (head != NULL && head != tail) {
+        rmptr = head;
+        head = head -> next();
+        delete rmptr;
+    }
+    head = tail = NULL;
+}
+
+template<class T> 
+dlist<T>::dlist(const dlist<T>& other) { //Copy Constructor
+    if (other.head == NULL) {
+        head = tail = NULL;
+    }
+    else {
+        head = new node<T>(other.head -> data(), other.head -> previous(), other.head -> next());
+        tail = head;
+        for (node<T>* cursor = other.head -> next(); cursor != NULL; cursor = cursor -> next(), tail = tail -> next()) {
+            tail -> set_next(new node<T>(cursor -> data(), tail));
+        }
+    }
+}
+
+template<class T>
+dlist<T>& dlist<T>::operator = (const dlist<T>& other) { //Assignment Constructor
+    //Initial assigment error check.
+    if (this == &other) {
+        return *this;
+    }
+    //Runs private functions & returns.
+    erase();
+
+    //Copies.
+    if (other.head == NULL) {
+        head = tail = NULL;
+    }
+    else {
+        head = new node<T>(other.head -> data(), other.head -> previous(), other.head -> next());
+        tail = head;
+        for (node<T>* cursor = other.head -> next(); cursor != NULL; cursor = cursor -> next(), tail = tail -> next()) {
+            tail -> set_next(new node<T>(cursor -> data(), tail));
+        }
+    }
+    return *this;
+}
+
+//###### ↑ ######### ↑ ############ ↑ ############ E N D ############ ↑ ############ ↑ ######### ↑ ######
+
+//############################################ H E L P E R S ############################################
+
+template<class T>
+void dlist<T>::front_insert(const T& data) { //Inserts node at beginning of the list.
+    if (head == NULL) {
+        head = tail = new node<T>(data);
+    }
+    else {
+        head = new node<T>(data, NULL, head);
+        head -> next() -> set_previous(head);
+    }
+}
+
+template<class T>
+void dlist<T>::rear_insert(const T& data) { //Inserts node at end of the list.
+    if (head == NULL) {
+        head = tail = new node<T>(data);
+    }
+    else {
+        tail -> set_next(new node<T>(data, tail, NULL));
+        tail = tail -> next();
+    }
+}
+
+template<class T>
+void dlist<T>::front_remove() { //Removes node at beginning of the list.
+    if (head == NULL) {
+        return;
+    }
+    else {
+        node<T>* cursor = head;
+        head = head -> next();
+        delete cursor;
+        head -> set_previous(NULL);
+    }
+}
+
+template<class T>
+void dlist<T>::rear_remove() { //Removes node at end of the list.
+    if (head == NULL) {
+        return;
+    }
+    else {
+        node<T>* cursor = tail;
+        tail = tail -> previous();
+        delete cursor;
+        tail -> set_next(NULL);
+    }
+}
+
+template<class T>
+void dlist<T>::show()const {
+    for (node<T>* cursor = head; cursor != NULL; cursor = cursor -> next()) { //Displays entire list.
+        std::cout << cursor -> data() << std::endl;
+    }
+}
+
+template<class T>
+void dlist<T>::reverse_show()const {
+    for (node<T>* cursor = tail; cursor != NULL; cursor = cursor -> previous()) { //Displays entire list reverse.
+        std::cout << cursor -> data() << std::endl;
+    }
+}
+
+template<class T>
+int dlist<T>::size() { //Returns size of list.
+    int counter = 0;
+    for (node<T>* cursor = head; cursor != NULL; cursor = cursor -> next(), counter++);
+    return counter;
+}
+
+//###### ↑ ######### ↑ ############ ↑ ############ E N D ############ ↑ ############ ↑ ######### ↑ ######
+
+//################################### I T E R A T O R   H E L P E R S ###################################
+
+template<class T>
+void dlist<T>::insert_before(iterator index, const T& data) { //Inserts node before index number.
+    if (head == NULL) {
+        head = tail = new node<T>(data);
+    }
+    else {
+        node<T>* previous = index.current -> previous();
+        node<T>* current = index.current;
+        node<T>* new_node = new node<T>(data, previous, current);
+        current -> set_previous(new_node);
+        if (new_node -> previous() == NULL) {
+            head = new_node;
+        }
+        else {
+            previous -> set_next(new_node);
+        }
+    }
+}
+
+template<class T>
+void dlist<T>::insert_after(iterator index, const T& data) { //Inserts node after index number.
+    if (head == NULL) {
+        head = tail = new node<T>(data);
+    }
+    else {
+        node<T>* current = index.current;
+        node<T>* next = index.current -> next();
+        node<T>* new_node = new node<T>(data, current, next);
+        current -> set_next(new_node);
+        if (new_node -> next() == NULL) {
+            tail = new_node;
+        }
+        else {
+            next -> set_previous(new_node);
+        }
+    }
+}
+
+template<class T>
+void dlist<T>::remove(iterator index) { //Removes node at index number.
+    if (head == NULL) return;
+
+    node<T>* previous = index.current -> previous();
+    node<T>* next = index.current -> next();
+    node<T>* current = index.current;
+
+    previous -> set_next(next);
+    next -> set_previous(previous);
+    delete current;
+}
+
+//###### ↑ ######### ↑ ############ ↑ ############ E N D ############ ↑ ############ ↑ ######### ↑ ######
